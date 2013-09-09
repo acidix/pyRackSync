@@ -8,203 +8,257 @@ import logging
 class RacktablesSyncClient(object):
 
     def __init__(self, RackTablesClient):
+        """Initialize the class
+
+        Keyword Arguments:
+        RackTablesClient -- RackTablesClient object (ibettinger's Python module)
+
+        """
         super(RacktablesSyncClient, self).__init__()
         self.rtClient = RackTablesClient
 
-    def syncServer (self, objtosync, objtype_id='4', linkparent=False):
-        try:
-            objects = {}
-            objects = self.rtClient.get_objects(None, False, objtype_id)
-        except Exception, errtxt:
-            logging.exception("Error initializing object tree: " + str(errtxt))
+    def doSyncObject (self, syncObject):
+        """Function to be called to synchronize an object
 
-        ## Check if the object exists in Racktables
-        objects = filter(lambda obj: obj['name'].lower() == objtosync['name'].lower(), objects)
+        Keyword Arguments:
+        syncObject   -- Dictionary object with special structure.
+
+        Data Structure:
+
+        syncObject{ "name": string,
+                    "objtype_id": string,
+                    "network": { "iface": { "name": string,
+                                            "mac": string,
+                                            "fqdn": string,
+                                            "ip": string,
+                                            "force": boolean
+                                           }
+                                }
+                    }
+                    "attrs": [ { "attrid" : "attrval" } ],
+                    "forceattrs": ["attrid"]
+        }
+        """
+        objtype_id = syncObject["objtype_id"]
+
+        objects = self.rtClient.get_objects(None, False, objtype_id)
+        objects = filter(lambda (idx, obj): obj["name"].lower() == syncObject["name"].lower(), objects.items())
 
         ## Object does not exist
         if len(objects) == 0:
-            self.addObj(objtosync, objtype_id, linkparent)
+            self.doAddObject(syncObject)
 
         ## Objects exists
         if len(objects) == 1:
-            targetObj = self.buildObjTree(objects[0])
-            self.syncObj(targetObj, objtosync)
+            targetObj = self.doBuildObjectTree(objects[0][1]["id"])
+            self.doSync(targetObj, syncObject)
 
         ## Multiple objects exist
         if len(objects) > 1:
             logging.exception("More than one matching objects found.")
 
-## -----------------------------------------
-## Build object tree
-## -----------------------------------------
-    def buildObjTree(self, obj):
+
+
+    def doBuildObjectTree(self, obj_id):
+        """Build an object tree from RackTables
+
+        Keyword Arguments:
+        obj_id -- Object ID for which to build the tree
+
+        """
         logging.debug("Object found in Racktables. Building sync tree")
 
-        targetObject = {}
-        targetObject["name"]    = obj["name"]
-        targetObject["id"]      = obj["id"]
-        targetObject["attrs"]   = {}
-        targetObject["network"] = {}
-        
+        rtObjectRaw = self.rtClient.get_object(obj_id, True, True)
+        rtObject = {}
+        initProperties = ["name", "id", "asset_no", "label", "objtype_id", "label", "comment"]
 
-        try:
-            ## get some more info and build the sync tree
-            targetObjectInfos = self.rtClient.get_object(obj["id"], True, True)
-        except Exception, errtxt:
-            logging.exception("Error getting objects details: " + str(errtxt))
-            raise errtxt
+        for prop in initProperties:
+            rtObject[prop]    = rtObjectRaw[prop]
 
-        ## add network ports
-        for net_idx, net in targetObjectInfos['ports'].items():
-            logging.debug("Processing port " + net['name'])
+        rtObject["attrs"]   = {}
+        rtObject["network"] = {}
 
-            targetObject["network"][net["name"]] = {
-                "name": net["name"],
-                "mac":  net["l2address"],
-                "fqdn": net["label"],
-                "id":   net["id"]
+        for idx, rtObjectRawNet in rtObjectRaw["ports"].items():
+            logging.debug("Processing port " + rtObjectRawNet["name"])
+
+            rtObject["network"][rtObjectRawNet["name"]] = {
+                "name": rtObjectRawNet["name"],
+                "mac" : rtObjectRawNet["l2address"],
+                "fqdn": rtObjectRawNet["label"],
+                "id"  : rtObjectRawNet["id"]
             }
 
-            for ip_idx, ip in targetObjectInfos['ipv4'].items():
-                # Raise if more than one allocation for current IP
-                if len(ip["addrinfo"]["allocs"]) != 1:
-                    raise Exception("Multiple allocations for IP:" + ip["addrinfo"]["ip"])
+            for idx, rtObjectRawIP in rtObjectRaw["ipv4"].items():
+                if len(rtObjectRawIP["addrinfo"]["allocs"]) != 1:
+                    raise Exception("Multiple allocations for IP:" + rtObjectRawIP["addrinfo"]["ip"])
                 
-                if ip["osif"] == net["name"]:
-                    targetObject["network"][net["name"]]["ip"] = ip["addrinfo"]["ip"]
+                if rtObjectRawIP["osif"] == rtObjectRawNet["name"]:
+                    rtObject["network"][rtObjectRawNet["name"]]["ip"] = rtObjectRawIP["addrinfo"]["ip"]
 
-        ## add attributes
-        for attr_idx, attr in targetObjectInfos['attrs'].items():
-            targetObject['attrs'][attr['id']] = attr['value']
+        for idx, rtObjectRawAttr in rtObjectRaw["attrs"].items():
+            rtObject["attrs"][rtObjectRawAttr["id"]] = rtObjectRawAttr["value"]
 
-        ## return the object
-        return targetObject
+        return rtObject
 
 
-## -----------------------------------------
-## Add object
-## -----------------------------------------
-    def addObj(self, objtosync, objtype_id, linkparent):
+
+
+    def doAddObject(self, syncObject):
+        """Add an object to RackTables
+
+        Keyword Arguments:
+        syncObject -- The dictionary object to create
+
+        """
         logging.debug("Object NOT found in Racktables. Creating it.")
-        try:
-            if 'attrs' in objtosync:
-                newObject = self.rtClient.add_object(objtosync['name'], None ,objtosync['name'], objtype_id, None, [], objtosync['attrs'])
-            else:
-                newObject = self.rtClient.add_object(objtosync['name'], None ,objtosync['name'], objtype_id)
-        except Exception, errtxt:
-            logging.exception("Error adding object: " + str(errtxt))
-            raise errtxt
+
+        if not "attrs" in syncObject:
+            syncObject["attrs"] = {}
+
+        newObject = self.rtClient.add_object(syncObject["name"], 
+            None,
+            syncObject["name"],
+            syncObject["objtype_id"],
+            None,
+            [],
+            syncObject["attrs"])
 
         ## Delete all implicitly created ports
-        logging.debug("Dropping all implicitly created ports")
         try:
-            for port_idx, port in newObject['ports'].items():
-                self.rtClient.delete_object_port(newObject['id'], port['id'])
+            for idx, newObjectPort in newObject["ports"].items():
+                self.rtClient.delete_object_port(newObject["id"], newObjectPort["id"])
         except Exception, errtxt:
             logging.exception("Error dropping ports: " + str(errtxt))
 
         ## Add ports    
         logging.debug("Adding network ports")
         try:
-            for net_idx, net in objtosync['network'].items():
-                net['newid'] = self.rtClient.add_object_port(newObject['id'], net['name'], net['mac'], '1-24', net['fqdn'])
-                if 'ip' in net:
-                    self.rtClient.add_object_ipv4_address(newObject['id'], net['ip'], net['name'])
+            for idx, syncObjectNet in syncObject["network"].items():
+                syncObjectNet["newid"] = self.rtClient.add_object_port(newObject["id"], 
+                    syncObjectNet["name"], 
+                    syncObjectNet["mac"], 
+                    "1-24", 
+                    syncObjectNet["fqdn"])
+
+                if "ip" in syncObjectNet:
+                    self.rtClient.add_object_ipv4_address(newObject["id"], 
+                        syncObjectNet["ip"], 
+                        syncObjectNet["name"])
         except Exception, errtxt:
             logging.exception("Error adding network port: " + str(errtxt))
 
-        if linkparent:
+        if syncObject["linkparent"]:
             try:
-                self.rtClient.link_entities(newObject['id'], linkparent)
+                self.rtClient.link_entities(newObject["id"], linkparent)
             except Exception, errtxt:
                 logging.exception("Error linking entities: " + str(errtxt))
 
-## -----------------------------------------
-## Sync object
-## -----------------------------------------
 
-    def syncObj(self, targetObject, objtosync):
+
+
+    def doSync(self, rtObject, syncObject):
+        """Synchronize object to RackTables
+
+        Keyword Arguments:
+        rtObject   -- The dictionary RackTables object
+        syncObject -- The dictionary object to create
+
+        """
         logging.debug("The object does exist, sync it") 
 
-        ## Synchronize network ports
-        for o_netidx, o_net in targetObject['network'].items():
-            ## Loop through the ports assigned on Racktables
-            ## If the port is found in the objtosync, deletePort is set to False and the port is synchronized
-            ## Otherwise the port is deleted
-            deletePort = True
-            for n_netidx, n_net in objtosync['network'].items():
-                ## If force is not explicitly set, assume no-force
-                if not 'force' in n_net:
-                    n_net['force'] = False
+        for rtObjectIdx, rtObjectNet in rtObject['network'].items():
 
-                ## Loop through the ports to sync
-                if ( 
-                        n_net['name'].lower() == o_net['name'].lower() and 
-                        n_net['mac'].lower()  == o_net['mac'].lower()
-                   ):
-                    logging.debug('Port match found. Not deleting port.')
-                    ## Port found, do not delete port
-                    deletePort = False
+            syncObjectNetFiltered = filter(lambda (idx, net): net["name"].lower() == rtObjectNet["name"].lower() and
+                net["mac"].lower() == rtObjectNet["mac"].lower(), syncObject["network"].items())
 
-                    if 'fqdn' in n_net:
-                        ## If objtosync specifies a fqdn, check if it differs and force is true, then sync
-                        if n_net['fqdn'].lower() != o_net['fqdn'].lower() and n_net['force'] == True:
-                            logging.debug('fqdn differs. Updating from ' + o_net['fqdn'] + ' to ' + n_net['fqdn'])
-                            self.rtClient.delete_object_port(targetObject['id'], o_net['id'])
-                            self.rtClient.add_object_port(targetObject['id'], n_net['name'], n_net['mac'], '1-24', n_net['fqdn'])
-                    if 'ip' in n_net:
-                        ## Only handle IPs for this port if specified by the objtosync
-                        if 'ip' in o_net:
-                            ## if there is an IP set in Racktables, we need to sync it (if force is true)
-                            if n_net['ip'] != o_net['ip'] and n_net['ip'] != '' and n_net['force'] == True:
-                                logging.debug('IP differs. Updating from ' + o_net['ip'] + ' to ' + n_net['ip'])
-                                logging.debug("Removing " + str(o_net['ip'] + " to add the new IP"))
-                                self.rtClient.delete_object_ipv4_address(targetObject['id'], o_net['ip'])
-                                logging.debug("Adding IP " + n_net['ip'])
-                                self.rtClient.add_object_ipv4_address(targetObject['id'], n_net['ip'], n_net['name'])
-                        else:
-                            ## if there is no IP set in Racktables, we can simply add it
-                            logging.debug("Adding IP " + n_net['ip'])
-                            self.rtClient.add_object_ipv4_address(targetObject['id'], n_net['ip'], n_net['name'])
-                    ## Interface is matched and updated, delete it from the sync object
-                    logging.debug("Interface " + n_net['name'] + " is synchronized.")
-                    del objtosync['network'][n_netidx]
-            if deletePort == True:
-                logging.debug('Port not found in target object. Deleting port.')
-                ## if the racktables port is not found in the sync object, delete it
-                if 'ip' in o_net:
-                    self.rtClient.delete_object_ipv4_address(targetObject['id'], o_net['ip'])
-                else:
-                    logging.debug('No IP Address found for port.')
-                self.rtClient.delete_object_port(targetObject['id'], o_net['id'])
+            if not syncObjectNetFiltered:
+                doDeletePort(rtObjectNet)
+                continue
+
+            if len(syncObjectNetFiltered) > 1:
+                raise Exception("Multiple matching ports in sync object. Aborting.")
+
+            syncObjectNet = syncObjectNetFiltered[0][1]
+            force = syncObjectNet.get("force", False)
+
+            if syncObjectNet["fqdn"].lower() != rtObjectNet["fqdn"].lower() and force:
+                doDeletePort(rtObject["id"], rtObjectNet)
+                rtObjectNet["id"] = doAddPort(rtObject["id"], rtObjectNet)
+
+            syncIP = syncObjectNet.get("ip", rtObjectNet.get("ip", False))
+            rtIP = rtObjectNet.get("ip", False)
+
+            if syncIP:
+                if not rtIP:
+                    doAddIP(rtObject["id"], syncIP, syncObjectNet['name'])
+                    rtIP = syncIP
+                if syncIP != rtIP:
+                    doDeleteIP(rtObject["id"], rtIP)
+                    doAddIP(rtObject["id"], syncIP, syncObjectNet['name'])
+
+            del syncObject["network"][syncObjectNetFiltered[0][0]]
+            
 
         ## Now add the ports we're left with
-        try:
-            for net_idx, net in objtosync['network'].items():
-                net['newid'] = self.rtClient.add_object_port(objtosync['id'], net['name'], net['mac'], '1-24', net['fqdn'])
-                try:
-                    if 'ip' in net:
-                        self.rtClient.add_object_ipv4_address(objtosync['id'], net['ip'], net['name'])
-                except KeyError:
-                    logging.debug("No IP found for interface " + net['name'])
-                    continue
-        except Exception, errtxt:
-            logging.exception("Error adding network port: " + str(errtxt))
+            for syncObjectNetIdx, syncObjectNet in syncObject['network'].items():
+                syncObjectNet["id"] = doAddPort(rtObject["id"], syncObjectNet)
+                if "ip" in net:
+                    doAddIP(rtObject["id"], syncObjectNet["ip"], syncObjectNet["name"])
 
-        if not "attrs" in objtosync:
+        if not "attrs" in syncObject:
+            print("No attributes")
             return
 
         ## Synchronize attrs
-        for o_attrname, o_attrval in targetObject["attrs"].items():
-            if o_attrname in objtosync["attrs"] and o_attrname in objtosync["forceattrs"]:
+        for o_attrname, o_attrval in rtObject["attrs"].items():
+            if o_attrname in syncObject["attrs"] and o_attrname in syncObject["forceattrs"]:
                 continue
 
-            objtosync['attrs'][o_attrname] = o_attrval
+            syncObject["attrs"][o_attrname] = o_attrval
             
 
         logging.debug("Updating attributes")
-        
-        try:
-            self.rtClient.edit_object(targetObjectInfos['id'], targetObjectInfos['name'], targetObjectInfos['asset_no'], targetObjectInfos['label'], targetObjectInfos['objtype_id'], targetObjectInfos['comment'], objtosync['attrs'])
-        except Exception, errtxt:
-            logging.exception("Error writing back attributes: %s" % errtxt)
+        self.rtClient.edit_object(rtObject["id"], rtObject["name"], rtObject["asset_no"], rtObject["label"], rtObject["objtype_id"], rtObject["comment"], syncObject["attrs"])
+
+    def doAddPort(self,objectID,port):
+        """Add Port in RackTables
+
+        Keyword Arguments:
+        objectID   -- ID of the object to add the port to (String)
+        port       -- Port dictionary (Dict)
+
+        """
+        return self.rtClient.add_object_port(rtObject["id"], rtObjectNet["name"], rtObjectNet["mac"], "1-24", syncObjectNet["fqdn"])
+
+    def doDeletePort(self, objectID, port):
+        """Delete a port and its IP address
+
+        Keyword Arguments:
+        objectID   -- ID of the object to add the port to (String)
+        port       -- Port dictionary (Dict)
+
+        """
+        if "ip" in port:
+            doDeleteIP(objectID, port["ip"])
+        self.rtClient.delete_object_port(objectID, port["id"])
+
+    def doAddIP(self, objectID, ip, iface):
+        """Add IP to object
+
+        Keyword Arguments:
+        objectID   -- ID of the object to add the port to (String)
+        ip         -- IP Address (String)
+        iface      -- Interface (String)
+
+        """
+        self.rtClient.add_object_ipv4_address(objectID, ip, iface)
+
+    def doDeleteIP(self,objectID,ip):
+        """Delete IP from object
+
+        Keyword Arguments:
+        objectID   -- ID of the object to add the port to (String)
+        ip         -- IP Address (String)
+
+        """
+        self.rtClient.delete_object_ipv4_address(objectID, ip)
