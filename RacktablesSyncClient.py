@@ -10,8 +10,7 @@ class RacktablesSyncClient(object):
     def __init__(self, RackTablesClient):
         """Initialize the class
 
-        Keyword Arguments:
-        RackTablesClient -- RackTablesClient object (ibettinger's Python module)
+        :param RackTablesClient: RackTablesClient object (ibettinger's Python module)
 
         """
         super(RacktablesSyncClient, self).__init__()
@@ -20,24 +19,23 @@ class RacktablesSyncClient(object):
     def doSyncObject (self, syncObject):
         """Function to be called to synchronize an object
 
-        Keyword Arguments:
-        syncObject   -- Dictionary object with special structure.
-
         Data Structure:
 
-        syncObject{ "name": string,
-                    "objtype_id": string,
-                    "network": { "iface": { "name": string,
-                                            "mac": string,
-                                            "fqdn": string,
-                                            "ip": string,
-                                            "force": boolean
-                                           }
-                                }
-                    }
-                    "attrs": [ { "attrid" : "attrval" } ],
-                    "forceattrs": ["attrid"]
-        }
+              syncObject{ "name": string,
+                          "objtype_id": string,
+                          "network": { "iface": { "name": string,
+                                                  "mac": string,
+                                                  "fqdn": string,
+                                                  "ip": string,
+                                                  "force": boolean
+                                                 }
+                                      }
+                          }
+                          "attrs": [ { "attrid" : "attrval" } ],
+                          "forceattrs": ["attrid"]
+              }
+
+        :param syncObject: Dictionary object with special structure.
         """
         objtype_id = syncObject["objtype_id"]
 
@@ -62,8 +60,8 @@ class RacktablesSyncClient(object):
     def doBuildObjectTree(self, obj_id):
         """Build an object tree from RackTables
 
-        Keyword Arguments:
-        obj_id -- Object ID for which to build the tree
+        :param obj_id: Object ID for which to build the tree
+        :returns: Dictionary with information pulled from RackTables
 
         """
         logging.debug("Object found in Racktables. Building sync tree")
@@ -106,8 +104,7 @@ class RacktablesSyncClient(object):
     def doAddObject(self, syncObject):
         """Add an object to RackTables
 
-        Keyword Arguments:
-        syncObject -- The dictionary object to create
+        :param syncObject: The dictionary object to create
 
         """
         logging.debug("Object NOT found in Racktables. Creating it.")
@@ -159,9 +156,8 @@ class RacktablesSyncClient(object):
     def doSync(self, rtObject, syncObject):
         """Synchronize object to RackTables
 
-        Keyword Arguments:
-        rtObject   -- The dictionary RackTables object
-        syncObject -- The dictionary object to create
+        :param rtObject: The dictionary RackTables object
+        :param syncObject: The dictionary object to create
 
         """
         logging.debug("The object does exist, sync it") 
@@ -223,9 +219,8 @@ class RacktablesSyncClient(object):
     def doAddPort(self,objectID,port):
         """Add Port in RackTables
 
-        Keyword Arguments:
-        objectID   -- ID of the object to add the port to (String)
-        port       -- Port dictionary (Dict)
+        :param objectID: ID of the object to add the port to (String)
+        :param port: Port dictionary (Dict)
 
         """
         return self.rtClient.add_object_port(rtObject["id"], rtObjectNet["name"], rtObjectNet["mac"], "1-24", syncObjectNet["fqdn"])
@@ -233,9 +228,8 @@ class RacktablesSyncClient(object):
     def doDeletePort(self, objectID, port):
         """Delete a port and its IP address
 
-        Keyword Arguments:
-        objectID   -- ID of the object to add the port to (String)
-        port       -- Port dictionary (Dict)
+        :param objectID: ID of the object to add the port to (String)
+        :param port: Port dictionary (Dict)
 
         """
         if "ip" in port:
@@ -245,10 +239,9 @@ class RacktablesSyncClient(object):
     def doAddIP(self, objectID, ip, iface):
         """Add IP to object
 
-        Keyword Arguments:
-        objectID   -- ID of the object to add the port to (String)
-        ip         -- IP Address (String)
-        iface      -- Interface (String)
+        :param objectID: ID of the object to add the port to (String)
+        :param ip: IP Address (String)
+        :param iface: Interface (String)
 
         """
         self.rtClient.add_object_ipv4_address(objectID, ip, iface)
@@ -256,9 +249,8 @@ class RacktablesSyncClient(object):
     def doDeleteIP(self,objectID,ip):
         """Delete IP from object
 
-        Keyword Arguments:
-        objectID   -- ID of the object to add the port to (String)
-        ip         -- IP Address (String)
+        :param objectID: ID of the object to add the port to (String)
+        :param ip: IP Address (String)
 
         """
         self.rtClient.delete_object_ipv4_address(objectID, ip)
