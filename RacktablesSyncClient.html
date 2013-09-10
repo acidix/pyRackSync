@@ -1,0 +1,271 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>RacktablesSyncClient Module &mdash; .  documentation</title>
+    
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title=".  documentation" href="index.html" />
+    <link rel="prev" title="Welcome to PyRackSync’s documentation!" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to PyRackSync’s documentation!"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">.  documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-RacktablesSyncClient">
+<span id="racktablessyncclient-module"></span><h1>RacktablesSyncClient Module<a class="headerlink" href="#module-RacktablesSyncClient" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="RacktablesSyncClient.RacktablesSyncClient">
+<em class="property">class </em><tt class="descclassname">RacktablesSyncClient.</tt><tt class="descname">RacktablesSyncClient</tt><big>(</big><em>RackTablesClient</em><big>)</big><a class="reference internal" href="_modules/RacktablesSyncClient.html#RacktablesSyncClient"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RacktablesSyncClient.RacktablesSyncClient" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">object</span></tt></p>
+<dl class="method">
+<dt id="RacktablesSyncClient.RacktablesSyncClient.doAddIP">
+<tt class="descname">doAddIP</tt><big>(</big><em>objectID</em>, <em>ip</em>, <em>iface</em><big>)</big><a class="reference internal" href="_modules/RacktablesSyncClient.html#RacktablesSyncClient.doAddIP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RacktablesSyncClient.RacktablesSyncClient.doAddIP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add IP to object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>objectID</strong> &#8211; ID of the object to add the port to (String)</li>
+<li><strong>ip</strong> &#8211; IP Address (String)</li>
+<li><strong>iface</strong> &#8211; Interface (String)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="RacktablesSyncClient.RacktablesSyncClient.doAddObject">
+<tt class="descname">doAddObject</tt><big>(</big><em>syncObject</em><big>)</big><a class="reference internal" href="_modules/RacktablesSyncClient.html#RacktablesSyncClient.doAddObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RacktablesSyncClient.RacktablesSyncClient.doAddObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an object to RackTables</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>syncObject</strong> &#8211; The dictionary object to create</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="RacktablesSyncClient.RacktablesSyncClient.doAddPort">
+<tt class="descname">doAddPort</tt><big>(</big><em>objectID</em>, <em>port</em><big>)</big><a class="reference internal" href="_modules/RacktablesSyncClient.html#RacktablesSyncClient.doAddPort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RacktablesSyncClient.RacktablesSyncClient.doAddPort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add Port in RackTables</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>objectID</strong> &#8211; ID of the object to add the port to (String)</li>
+<li><strong>port</strong> &#8211; Port dictionary (Dict)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="RacktablesSyncClient.RacktablesSyncClient.doBuildObjectTree">
+<tt class="descname">doBuildObjectTree</tt><big>(</big><em>obj_id</em><big>)</big><a class="reference internal" href="_modules/RacktablesSyncClient.html#RacktablesSyncClient.doBuildObjectTree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RacktablesSyncClient.RacktablesSyncClient.doBuildObjectTree" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build an object tree from RackTables</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>obj_id</strong> &#8211; Object ID for which to build the tree</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Dictionary with information pulled from RackTables</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="RacktablesSyncClient.RacktablesSyncClient.doDeleteIP">
+<tt class="descname">doDeleteIP</tt><big>(</big><em>objectID</em>, <em>ip</em><big>)</big><a class="reference internal" href="_modules/RacktablesSyncClient.html#RacktablesSyncClient.doDeleteIP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RacktablesSyncClient.RacktablesSyncClient.doDeleteIP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete IP from object</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>objectID</strong> &#8211; ID of the object to add the port to (String)</li>
+<li><strong>ip</strong> &#8211; IP Address (String)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="RacktablesSyncClient.RacktablesSyncClient.doDeletePort">
+<tt class="descname">doDeletePort</tt><big>(</big><em>objectID</em>, <em>port</em><big>)</big><a class="reference internal" href="_modules/RacktablesSyncClient.html#RacktablesSyncClient.doDeletePort"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RacktablesSyncClient.RacktablesSyncClient.doDeletePort" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete a port and its IP address</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>objectID</strong> &#8211; ID of the object to add the port to (String)</li>
+<li><strong>port</strong> &#8211; Port dictionary (Dict)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="RacktablesSyncClient.RacktablesSyncClient.doSync">
+<tt class="descname">doSync</tt><big>(</big><em>rtObject</em>, <em>syncObject</em><big>)</big><a class="reference internal" href="_modules/RacktablesSyncClient.html#RacktablesSyncClient.doSync"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RacktablesSyncClient.RacktablesSyncClient.doSync" title="Permalink to this definition">¶</a></dt>
+<dd><p>Synchronize object to RackTables</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>rtObject</strong> &#8211; The dictionary RackTables object</li>
+<li><strong>syncObject</strong> &#8211; The dictionary object to create</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="RacktablesSyncClient.RacktablesSyncClient.doSyncObject">
+<tt class="descname">doSyncObject</tt><big>(</big><em>syncObject</em><big>)</big><a class="reference internal" href="_modules/RacktablesSyncClient.html#RacktablesSyncClient.doSyncObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#RacktablesSyncClient.RacktablesSyncClient.doSyncObject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function to be called to synchronize an object</p>
+<p>Data Structure:</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>syncObject{ &#8220;name&#8221;: string,</dt>
+<dd><p class="first">&#8220;objtype_id&#8221;: string,
+&#8220;network&#8221;: { &#8220;iface&#8221;: { &#8220;name&#8221;: string,</p>
+<blockquote>
+<div><blockquote>
+<div><blockquote>
+<div>&#8220;mac&#8221;: string,
+&#8220;fqdn&#8221;: string,
+&#8220;ip&#8221;: string,
+&#8220;force&#8221;: boolean</div></blockquote>
+<p>}</p>
+</div></blockquote>
+<p>}</p>
+</div></blockquote>
+<p class="last">}
+&#8220;attrs&#8221;: [ { &#8220;attrid&#8221; : &#8220;attrval&#8221; } ],
+&#8220;forceattrs&#8221;: [&#8220;attrid&#8221;]</p>
+</dd>
+</dl>
+<p>}</p>
+</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>syncObject</strong> &#8211; Dictionary object with special structure.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="index.html"
+                        title="previous chapter">Welcome to PyRackSync&#8217;s documentation!</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/RacktablesSyncClient.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Welcome to PyRackSync’s documentation!"
+             >previous</a> |</li>
+        <li><a href="index.html">.  documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>

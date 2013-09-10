@@ -1,0 +1,348 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>RacktablesSyncClient &mdash; .  documentation</title>
+    
+    <link rel="stylesheet" href="../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title=".  documentation" href="../index.html" />
+    <link rel="up" title="Module code" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">.  documentation</a> &raquo;</li>
+          <li><a href="index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for RacktablesSyncClient</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+<span class="c"># -*- coding: utf-8 -*-</span>
+
+<span class="c"># Python Module to push (one way) to Racktables</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<div class="viewcode-block" id="RacktablesSyncClient"><a class="viewcode-back" href="../RacktablesSyncClient.html#RacktablesSyncClient.RacktablesSyncClient">[docs]</a><span class="k">class</span> <span class="nc">RacktablesSyncClient</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">RackTablesClient</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize the class</span>
+
+<span class="sd">        :param RackTablesClient: RackTablesClient object (ibettinger&#39;s Python module)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RacktablesSyncClient</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rtClient</span> <span class="o">=</span> <span class="n">RackTablesClient</span>
+
+<div class="viewcode-block" id="RacktablesSyncClient.doSyncObject"><a class="viewcode-back" href="../RacktablesSyncClient.html#RacktablesSyncClient.RacktablesSyncClient.doSyncObject">[docs]</a>    <span class="k">def</span> <span class="nf">doSyncObject</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">syncObject</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Function to be called to synchronize an object</span>
+
+<span class="sd">        Data Structure:</span>
+
+<span class="sd">              syncObject{ &quot;name&quot;: string,</span>
+<span class="sd">                          &quot;objtype_id&quot;: string,</span>
+<span class="sd">                          &quot;network&quot;: { &quot;iface&quot;: { &quot;name&quot;: string,</span>
+<span class="sd">                                                  &quot;mac&quot;: string,</span>
+<span class="sd">                                                  &quot;fqdn&quot;: string,</span>
+<span class="sd">                                                  &quot;ip&quot;: string,</span>
+<span class="sd">                                                  &quot;force&quot;: boolean</span>
+<span class="sd">                                                 }</span>
+<span class="sd">                                      }</span>
+<span class="sd">                          }</span>
+<span class="sd">                          &quot;attrs&quot;: [ { &quot;attrid&quot; : &quot;attrval&quot; } ],</span>
+<span class="sd">                          &quot;forceattrs&quot;: [&quot;attrid&quot;]</span>
+<span class="sd">              }</span>
+
+<span class="sd">        :param syncObject: Dictionary object with special structure.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">objtype_id</span> <span class="o">=</span> <span class="n">syncObject</span><span class="p">[</span><span class="s">&quot;objtype_id&quot;</span><span class="p">]</span>
+
+        <span class="n">objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rtClient</span><span class="o">.</span><span class="n">get_objects</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="n">objtype_id</span><span class="p">)</span>
+        <span class="n">objects</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span> <span class="n">obj</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">syncObject</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">objects</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+        <span class="c">## Object does not exist</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">doAddObject</span><span class="p">(</span><span class="n">syncObject</span><span class="p">)</span>
+
+        <span class="c">## Objects exists</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">targetObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">doBuildObjectTree</span><span class="p">(</span><span class="n">objects</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="s">&quot;id&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">doSync</span><span class="p">(</span><span class="n">targetObj</span><span class="p">,</span> <span class="n">syncObject</span><span class="p">)</span>
+
+        <span class="c">## Multiple objects exist</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;More than one matching objects found.&quot;</span><span class="p">)</span>
+
+
+</div>
+<div class="viewcode-block" id="RacktablesSyncClient.doBuildObjectTree"><a class="viewcode-back" href="../RacktablesSyncClient.html#RacktablesSyncClient.RacktablesSyncClient.doBuildObjectTree">[docs]</a>    <span class="k">def</span> <span class="nf">doBuildObjectTree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj_id</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Build an object tree from RackTables</span>
+
+<span class="sd">        :param obj_id: Object ID for which to build the tree</span>
+<span class="sd">        :returns: Dictionary with information pulled from RackTables</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Object found in Racktables. Building sync tree&quot;</span><span class="p">)</span>
+
+        <span class="n">rtObjectRaw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rtClient</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="n">obj_id</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">rtObject</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">initProperties</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">,</span> <span class="s">&quot;id&quot;</span><span class="p">,</span> <span class="s">&quot;asset_no&quot;</span><span class="p">,</span> <span class="s">&quot;label&quot;</span><span class="p">,</span> <span class="s">&quot;objtype_id&quot;</span><span class="p">,</span> <span class="s">&quot;label&quot;</span><span class="p">,</span> <span class="s">&quot;comment&quot;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">initProperties</span><span class="p">:</span>
+            <span class="n">rtObject</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span>    <span class="o">=</span> <span class="n">rtObjectRaw</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span>
+
+        <span class="n">rtObject</span><span class="p">[</span><span class="s">&quot;attrs&quot;</span><span class="p">]</span>   <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">rtObject</span><span class="p">[</span><span class="s">&quot;network&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">rtObjectRawNet</span> <span class="ow">in</span> <span class="n">rtObjectRaw</span><span class="p">[</span><span class="s">&quot;ports&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Processing port &quot;</span> <span class="o">+</span> <span class="n">rtObjectRawNet</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">])</span>
+
+            <span class="n">rtObject</span><span class="p">[</span><span class="s">&quot;network&quot;</span><span class="p">][</span><span class="n">rtObjectRawNet</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="n">rtObjectRawNet</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">],</span>
+                <span class="s">&quot;mac&quot;</span> <span class="p">:</span> <span class="n">rtObjectRawNet</span><span class="p">[</span><span class="s">&quot;l2address&quot;</span><span class="p">],</span>
+                <span class="s">&quot;fqdn&quot;</span><span class="p">:</span> <span class="n">rtObjectRawNet</span><span class="p">[</span><span class="s">&quot;label&quot;</span><span class="p">],</span>
+                <span class="s">&quot;id&quot;</span>  <span class="p">:</span> <span class="n">rtObjectRawNet</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">]</span>
+            <span class="p">}</span>
+
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">rtObjectRawIP</span> <span class="ow">in</span> <span class="n">rtObjectRaw</span><span class="p">[</span><span class="s">&quot;ipv4&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rtObjectRawIP</span><span class="p">[</span><span class="s">&quot;addrinfo&quot;</span><span class="p">][</span><span class="s">&quot;allocs&quot;</span><span class="p">])</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Multiple allocations for IP:&quot;</span> <span class="o">+</span> <span class="n">rtObjectRawIP</span><span class="p">[</span><span class="s">&quot;addrinfo&quot;</span><span class="p">][</span><span class="s">&quot;ip&quot;</span><span class="p">])</span>
+                
+                <span class="k">if</span> <span class="n">rtObjectRawIP</span><span class="p">[</span><span class="s">&quot;osif&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">rtObjectRawNet</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">]:</span>
+                    <span class="n">rtObject</span><span class="p">[</span><span class="s">&quot;network&quot;</span><span class="p">][</span><span class="n">rtObjectRawNet</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">]][</span><span class="s">&quot;ip&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rtObjectRawIP</span><span class="p">[</span><span class="s">&quot;addrinfo&quot;</span><span class="p">][</span><span class="s">&quot;ip&quot;</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">rtObjectRawAttr</span> <span class="ow">in</span> <span class="n">rtObjectRaw</span><span class="p">[</span><span class="s">&quot;attrs&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">rtObject</span><span class="p">[</span><span class="s">&quot;attrs&quot;</span><span class="p">][</span><span class="n">rtObjectRawAttr</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">rtObjectRawAttr</span><span class="p">[</span><span class="s">&quot;value&quot;</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">rtObject</span>
+
+
+
+</div>
+<div class="viewcode-block" id="RacktablesSyncClient.doAddObject"><a class="viewcode-back" href="../RacktablesSyncClient.html#RacktablesSyncClient.RacktablesSyncClient.doAddObject">[docs]</a>    <span class="k">def</span> <span class="nf">doAddObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">syncObject</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add an object to RackTables</span>
+
+<span class="sd">        :param syncObject: The dictionary object to create</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Object NOT found in Racktables. Creating it.&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="s">&quot;attrs&quot;</span> <span class="ow">in</span> <span class="n">syncObject</span><span class="p">:</span>
+            <span class="n">syncObject</span><span class="p">[</span><span class="s">&quot;attrs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">newObject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rtClient</span><span class="o">.</span><span class="n">add_object</span><span class="p">(</span><span class="n">syncObject</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">],</span> 
+            <span class="bp">None</span><span class="p">,</span>
+            <span class="n">syncObject</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">],</span>
+            <span class="n">syncObject</span><span class="p">[</span><span class="s">&quot;objtype_id&quot;</span><span class="p">],</span>
+            <span class="bp">None</span><span class="p">,</span>
+            <span class="p">[],</span>
+            <span class="n">syncObject</span><span class="p">[</span><span class="s">&quot;attrs&quot;</span><span class="p">])</span>
+
+        <span class="c">## Delete all implicitly created ports</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">newObjectPort</span> <span class="ow">in</span> <span class="n">newObject</span><span class="p">[</span><span class="s">&quot;ports&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rtClient</span><span class="o">.</span><span class="n">delete_object_port</span><span class="p">(</span><span class="n">newObject</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> <span class="n">newObjectPort</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">errtxt</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;Error dropping ports: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">errtxt</span><span class="p">))</span>
+
+        <span class="c">## Add ports    </span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Adding network ports&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">syncObjectNet</span> <span class="ow">in</span> <span class="n">syncObject</span><span class="p">[</span><span class="s">&quot;network&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">syncObjectNet</span><span class="p">[</span><span class="s">&quot;newid&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rtClient</span><span class="o">.</span><span class="n">add_object_port</span><span class="p">(</span><span class="n">newObject</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> 
+                    <span class="n">syncObjectNet</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">],</span> 
+                    <span class="n">syncObjectNet</span><span class="p">[</span><span class="s">&quot;mac&quot;</span><span class="p">],</span> 
+                    <span class="s">&quot;1-24&quot;</span><span class="p">,</span> 
+                    <span class="n">syncObjectNet</span><span class="p">[</span><span class="s">&quot;fqdn&quot;</span><span class="p">])</span>
+
+                <span class="k">if</span> <span class="s">&quot;ip&quot;</span> <span class="ow">in</span> <span class="n">syncObjectNet</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">rtClient</span><span class="o">.</span><span class="n">add_object_ipv4_address</span><span class="p">(</span><span class="n">newObject</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> 
+                        <span class="n">syncObjectNet</span><span class="p">[</span><span class="s">&quot;ip&quot;</span><span class="p">],</span> 
+                        <span class="n">syncObjectNet</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">errtxt</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;Error adding network port: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">errtxt</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">syncObject</span><span class="p">[</span><span class="s">&quot;linkparent&quot;</span><span class="p">]:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">rtClient</span><span class="o">.</span><span class="n">link_entities</span><span class="p">(</span><span class="n">newObject</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> <span class="n">linkparent</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">errtxt</span><span class="p">:</span>
+                <span class="n">logging</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="s">&quot;Error linking entities: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">errtxt</span><span class="p">))</span>
+
+
+
+</div>
+<div class="viewcode-block" id="RacktablesSyncClient.doSync"><a class="viewcode-back" href="../RacktablesSyncClient.html#RacktablesSyncClient.RacktablesSyncClient.doSync">[docs]</a>    <span class="k">def</span> <span class="nf">doSync</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rtObject</span><span class="p">,</span> <span class="n">syncObject</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Synchronize object to RackTables</span>
+
+<span class="sd">        :param rtObject: The dictionary RackTables object</span>
+<span class="sd">        :param syncObject: The dictionary object to create</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;The object does exist, sync it&quot;</span><span class="p">)</span> 
+
+        <span class="k">for</span> <span class="n">rtObjectIdx</span><span class="p">,</span> <span class="n">rtObjectNet</span> <span class="ow">in</span> <span class="n">rtObject</span><span class="p">[</span><span class="s">&#39;network&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+            <span class="n">syncObjectNetFiltered</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span><span class="k">lambda</span> <span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">net</span><span class="p">):</span> <span class="n">net</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">rtObjectNet</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">and</span>
+                <span class="n">net</span><span class="p">[</span><span class="s">&quot;mac&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">rtObjectNet</span><span class="p">[</span><span class="s">&quot;mac&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">syncObject</span><span class="p">[</span><span class="s">&quot;network&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">syncObjectNetFiltered</span><span class="p">:</span>
+                <span class="n">doDeletePort</span><span class="p">(</span><span class="n">rtObjectNet</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">syncObjectNetFiltered</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&quot;Multiple matching ports in sync object. Aborting.&quot;</span><span class="p">)</span>
+
+            <span class="n">syncObjectNet</span> <span class="o">=</span> <span class="n">syncObjectNetFiltered</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">force</span> <span class="o">=</span> <span class="n">syncObjectNet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;force&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">syncObjectNet</span><span class="p">[</span><span class="s">&quot;fqdn&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="n">rtObjectNet</span><span class="p">[</span><span class="s">&quot;fqdn&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">and</span> <span class="n">force</span><span class="p">:</span>
+                <span class="n">doDeletePort</span><span class="p">(</span><span class="n">rtObject</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> <span class="n">rtObjectNet</span><span class="p">)</span>
+                <span class="n">rtObjectNet</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">doAddPort</span><span class="p">(</span><span class="n">rtObject</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> <span class="n">rtObjectNet</span><span class="p">)</span>
+
+            <span class="n">syncIP</span> <span class="o">=</span> <span class="n">syncObjectNet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;ip&quot;</span><span class="p">,</span> <span class="n">rtObjectNet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;ip&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">))</span>
+            <span class="n">rtIP</span> <span class="o">=</span> <span class="n">rtObjectNet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;ip&quot;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">syncIP</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">rtIP</span><span class="p">:</span>
+                    <span class="n">doAddIP</span><span class="p">(</span><span class="n">rtObject</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> <span class="n">syncIP</span><span class="p">,</span> <span class="n">syncObjectNet</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+                    <span class="n">rtIP</span> <span class="o">=</span> <span class="n">syncIP</span>
+                <span class="k">if</span> <span class="n">syncIP</span> <span class="o">!=</span> <span class="n">rtIP</span><span class="p">:</span>
+                    <span class="n">doDeleteIP</span><span class="p">(</span><span class="n">rtObject</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> <span class="n">rtIP</span><span class="p">)</span>
+                    <span class="n">doAddIP</span><span class="p">(</span><span class="n">rtObject</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> <span class="n">syncIP</span><span class="p">,</span> <span class="n">syncObjectNet</span><span class="p">[</span><span class="s">&#39;name&#39;</span><span class="p">])</span>
+
+            <span class="k">del</span> <span class="n">syncObject</span><span class="p">[</span><span class="s">&quot;network&quot;</span><span class="p">][</span><span class="n">syncObjectNetFiltered</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+            
+
+        <span class="c">## Now add the ports we&#39;re left with</span>
+            <span class="k">for</span> <span class="n">syncObjectNetIdx</span><span class="p">,</span> <span class="n">syncObjectNet</span> <span class="ow">in</span> <span class="n">syncObject</span><span class="p">[</span><span class="s">&#39;network&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">syncObjectNet</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">doAddPort</span><span class="p">(</span><span class="n">rtObject</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> <span class="n">syncObjectNet</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s">&quot;ip&quot;</span> <span class="ow">in</span> <span class="n">net</span><span class="p">:</span>
+                    <span class="n">doAddIP</span><span class="p">(</span><span class="n">rtObject</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> <span class="n">syncObjectNet</span><span class="p">[</span><span class="s">&quot;ip&quot;</span><span class="p">],</span> <span class="n">syncObjectNet</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="s">&quot;attrs&quot;</span> <span class="ow">in</span> <span class="n">syncObject</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;No attributes&quot;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c">## Synchronize attrs</span>
+        <span class="k">for</span> <span class="n">o_attrname</span><span class="p">,</span> <span class="n">o_attrval</span> <span class="ow">in</span> <span class="n">rtObject</span><span class="p">[</span><span class="s">&quot;attrs&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">o_attrname</span> <span class="ow">in</span> <span class="n">syncObject</span><span class="p">[</span><span class="s">&quot;attrs&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">o_attrname</span> <span class="ow">in</span> <span class="n">syncObject</span><span class="p">[</span><span class="s">&quot;forceattrs&quot;</span><span class="p">]:</span>
+                <span class="k">continue</span>
+
+            <span class="n">syncObject</span><span class="p">[</span><span class="s">&quot;attrs&quot;</span><span class="p">][</span><span class="n">o_attrname</span><span class="p">]</span> <span class="o">=</span> <span class="n">o_attrval</span>
+            
+
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&quot;Updating attributes&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rtClient</span><span class="o">.</span><span class="n">edit_object</span><span class="p">(</span><span class="n">rtObject</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> <span class="n">rtObject</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">],</span> <span class="n">rtObject</span><span class="p">[</span><span class="s">&quot;asset_no&quot;</span><span class="p">],</span> <span class="n">rtObject</span><span class="p">[</span><span class="s">&quot;label&quot;</span><span class="p">],</span> <span class="n">rtObject</span><span class="p">[</span><span class="s">&quot;objtype_id&quot;</span><span class="p">],</span> <span class="n">rtObject</span><span class="p">[</span><span class="s">&quot;comment&quot;</span><span class="p">],</span> <span class="n">syncObject</span><span class="p">[</span><span class="s">&quot;attrs&quot;</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="RacktablesSyncClient.doAddPort"><a class="viewcode-back" href="../RacktablesSyncClient.html#RacktablesSyncClient.RacktablesSyncClient.doAddPort">[docs]</a>    <span class="k">def</span> <span class="nf">doAddPort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">objectID</span><span class="p">,</span><span class="n">port</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add Port in RackTables</span>
+
+<span class="sd">        :param objectID: ID of the object to add the port to (String)</span>
+<span class="sd">        :param port: Port dictionary (Dict)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rtClient</span><span class="o">.</span><span class="n">add_object_port</span><span class="p">(</span><span class="n">rtObject</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">],</span> <span class="n">rtObjectNet</span><span class="p">[</span><span class="s">&quot;name&quot;</span><span class="p">],</span> <span class="n">rtObjectNet</span><span class="p">[</span><span class="s">&quot;mac&quot;</span><span class="p">],</span> <span class="s">&quot;1-24&quot;</span><span class="p">,</span> <span class="n">syncObjectNet</span><span class="p">[</span><span class="s">&quot;fqdn&quot;</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="RacktablesSyncClient.doDeletePort"><a class="viewcode-back" href="../RacktablesSyncClient.html#RacktablesSyncClient.RacktablesSyncClient.doDeletePort">[docs]</a>    <span class="k">def</span> <span class="nf">doDeletePort</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objectID</span><span class="p">,</span> <span class="n">port</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete a port and its IP address</span>
+
+<span class="sd">        :param objectID: ID of the object to add the port to (String)</span>
+<span class="sd">        :param port: Port dictionary (Dict)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s">&quot;ip&quot;</span> <span class="ow">in</span> <span class="n">port</span><span class="p">:</span>
+            <span class="n">doDeleteIP</span><span class="p">(</span><span class="n">objectID</span><span class="p">,</span> <span class="n">port</span><span class="p">[</span><span class="s">&quot;ip&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rtClient</span><span class="o">.</span><span class="n">delete_object_port</span><span class="p">(</span><span class="n">objectID</span><span class="p">,</span> <span class="n">port</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">])</span>
+</div>
+<div class="viewcode-block" id="RacktablesSyncClient.doAddIP"><a class="viewcode-back" href="../RacktablesSyncClient.html#RacktablesSyncClient.RacktablesSyncClient.doAddIP">[docs]</a>    <span class="k">def</span> <span class="nf">doAddIP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objectID</span><span class="p">,</span> <span class="n">ip</span><span class="p">,</span> <span class="n">iface</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add IP to object</span>
+
+<span class="sd">        :param objectID: ID of the object to add the port to (String)</span>
+<span class="sd">        :param ip: IP Address (String)</span>
+<span class="sd">        :param iface: Interface (String)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rtClient</span><span class="o">.</span><span class="n">add_object_ipv4_address</span><span class="p">(</span><span class="n">objectID</span><span class="p">,</span> <span class="n">ip</span><span class="p">,</span> <span class="n">iface</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="RacktablesSyncClient.doDeleteIP"><a class="viewcode-back" href="../RacktablesSyncClient.html#RacktablesSyncClient.RacktablesSyncClient.doDeleteIP">[docs]</a>    <span class="k">def</span> <span class="nf">doDeleteIP</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">objectID</span><span class="p">,</span><span class="n">ip</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Delete IP from object</span>
+
+<span class="sd">        :param objectID: ID of the object to add the port to (String)</span>
+<span class="sd">        :param ip: IP Address (String)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rtClient</span><span class="o">.</span><span class="n">delete_object_ipv4_address</span><span class="p">(</span><span class="n">objectID</span><span class="p">,</span> <span class="n">ip</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../index.html">.  documentation</a> &raquo;</li>
+          <li><a href="index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Author.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2b1.
+    </div>
+  </body>
+</html>
