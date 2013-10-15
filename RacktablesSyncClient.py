@@ -222,10 +222,9 @@ class RacktablesSyncClient(object):
 
         :param objectID: ID of the object to add the port to (String)
         :param port: Port dictionary (Dict)
-        :returns: ID of new port
 
         """
-        return self.rtClient.add_object_port(objectID, port["name"], port["mac"], "1-24", port["fqdn"])
+        self.rtClient.add_object_port(objectID, port["name"], port["mac"], "1-24", port["fqdn"])
 
     def doDeletePort(self, objectID, port):
         """Delete a port and its IP address
